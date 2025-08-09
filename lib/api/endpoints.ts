@@ -1,6 +1,10 @@
 export const endpoints = {
-  users: "dashboard/users",
+  // Dashboard resources
+  users: "/dashboard/users",
+  branches: "/dashboard/branches",
+
   districts: "/Districts",
+
   mosques: "/Mosques",
   mosquesEnums: {
     base: "/Mosques/enums",
@@ -11,7 +15,9 @@ export const endpoints = {
     demolitionPercentage: "/Mosques/enums/demolition-percentage",
     destructionStatus: "/Mosques/enums/destruction-status",
   },
+
   mosqueAttachments: "/mosque-attachments",
+
   workers: "/Workers",
   workersEnums: {
     base: "/Workers/enums",

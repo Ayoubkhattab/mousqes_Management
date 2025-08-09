@@ -23,6 +23,13 @@ export interface District {
   name: string;
 }
 
+export interface Branch {
+  id: ID;
+  name: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface Mosque {
   id: ID;
   name: string;
