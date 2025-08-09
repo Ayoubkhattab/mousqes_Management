@@ -1,33 +1,51 @@
-import { api } from "@/lib/api/client";
-import type { ID, ListResponse, User } from "@/features/shared/types";
-import { endpoints } from "@/lib/api/endpoints";
+import type { ID, User } from "@/features/shared/types";
+import type { ListParams } from "@/lib/crud/types";
+import { createCrudApi } from "@/lib/crud/http";
 
-export const getUsers = async (params?: Record<string, any>) => {
-  console.log("first", endpoints.users);
-  const { data } = await api.get<ListResponse<User>>(endpoints.users, {
-    params,
-  });
-  return data;
+export type CreateUserDto = {
+  username: string;
+  password: string;
+  name: string;
+  role: string; // "branch_manager" | "supervisor" | ...
+  branch_id?: ID; // required for certain roles
 };
 
-export const getUser = async (id: ID) => {
-  const { data } = await api.get<User>(`${endpoints.users}/${id}`);
-  return data;
+export type UpdateUserDto = {
+  username?: string; //
+  name?: string;
+  password?: string;
+  role?: string;
+  is_active?: 0 | 1 | boolean | "0" | "1";
+  branch_id?: ID;
 };
 
-export const createUser = async (payload: Partial<User>) => {
-  const { data } = await api.post<User>(endpoints.users, payload);
-  return data;
-};
+/** convert ui filters to backend parameter (filter[name], sort, page...) */
+function mapListParams(p?: ListParams) {
+  const out: Record<string, any> = {};
+  if (!p) return out;
 
-export const updateUser = async (id: ID, payload: Partial<User>) => {
-  const { data } = await api.put<User>(`${endpoints.users}/${id}`, payload);
-  return data;
-};
+  if (p.page !== undefined) out.page = p.page;
+  if (p.pageSize !== undefined) out.pageSize = p.pageSize;
+  if (p.sort) out.sort = p.sort;
+  if (p.filters?.name) out["filter[name]"] = p.filters.name;
 
-export const deleteUser = async (id: ID) => {
-  const { data } = await api.delete<{ success: boolean }>(
-    `${endpoints.users}/${id}`
-  );
-  return data;
-};
+  return out;
+}
+
+export const usersApi = createCrudApi<User, CreateUserDto, UpdateUserDto>({
+  basePath: "/dashboard/users",
+  mapListParams,
+  urlencoded: true, // POST/PUT body urlencoded
+});
+
+export async function updateUser(id: ID, payload: UpdateUserDto) {
+  const normalized: any = {};
+  for (const [k, v] of Object.entries(payload ?? {})) {
+    if (v === "" || v === undefined || v === null) continue;
+    if (k === "is_active") {
+      normalized.is_active = v === true || v === 1 || v === "1" ? 1 : 0;
+    } else {
+      normalized[k] = v;
+    }
+  }
+}
