@@ -30,28 +30,41 @@ const columnsBase: ColumnDef<User>[] = [
     enableSorting: true,
     cell: ({ row }) => String(row.original.id),
   },
+
   {
     accessorKey: "username",
     header: "اسم المستخدم" as const,
-    enableSorting: true,
+    enableSorting: false,
   },
+
   {
     accessorKey: "name",
     header: "الاسم" as const,
-    enableSorting: true,
+    enableSorting: false,
     cell: ({ row }) => row.original.name ?? "-",
   },
+
   {
     accessorKey: "roles.name",
     header: "الدور" as const,
     enableSorting: false,
     cell: ({ row }) => row.original.roles?.name ?? "-",
   },
+
   {
     accessorKey: "branch.name",
     header: "الفرع" as const,
     enableSorting: false,
     cell: ({ row }) => row.original.branch?.name ?? "-",
+  },
+  {
+    accessorKey: "created_at",
+    header: "تاريخ الإنشاء" as const,
+    enableSorting: true,
+    cell: ({ row }) =>
+      row.original.created_at
+        ? new Date(row.original.created_at).toLocaleDateString()
+        : "-",
   },
   {
     accessorKey: "is_active",
@@ -74,21 +87,17 @@ const columnsBase: ColumnDef<User>[] = [
 function mapSortingToBackend(s: SortingState): string | undefined {
   const first = s[0];
   if (!first) return undefined;
-  const col = first.id;
-  const dir = first.desc ? "-" : "";
-  if (
-    [
-      "id",
-      "username",
-      "name",
-      "created_at",
-      "updated_at",
-      "is_active",
-    ].includes(col)
-  ) {
-    return `${dir}${col}`;
-  }
-  return undefined;
+
+  const allowed: Record<string, string> = {
+    id: "id",
+    created_at: "created_at",
+    is_active: "is_active",
+  };
+
+  const key = allowed[first.id];
+  if (!key) return undefined;
+
+  return `${first.desc ? "-" : ""}${key}`;
 }
 
 export default function UsersPage() {
