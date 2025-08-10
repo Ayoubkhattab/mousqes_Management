@@ -7,6 +7,7 @@ import {
   Building2,
   LayoutDashboard,
   LogOut,
+  MapPin,
   Users,
   type LucideIcon,
 } from "lucide-react";
@@ -22,6 +23,11 @@ const DEFAULT_NAV = [
   { href: "/dashboard", label: "الصفحة الرئيسية", icon: LayoutDashboard },
   { href: "/dashboard/users", label: "المستخدمون", icon: Users },
   { href: "/dashboard/mosques", label: "المساجد", icon: Building2 },
+  {
+    href: "/dashboard/districts",
+    label: "المناطق",
+    icon: MapPin,
+  },
 ] as const satisfies readonly NavItem[];
 
 export default function Sidebar({

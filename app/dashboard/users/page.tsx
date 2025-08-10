@@ -172,7 +172,7 @@ export default function UsersPage() {
             }}
             className="w-56"
           />
-          <Button onClick={() => setOpenCreate(true)}>Create User</Button>
+          <Button onClick={() => setOpenCreate(true)}>إنشاء مستخدم</Button>
         </div>
       </div>
 
@@ -201,12 +201,10 @@ export default function UsersPage() {
       {/* Create Dialog */}
       <Dialog open={openCreate} onOpenChange={setOpenCreate}>
         <DialogContent size="md" align="top">
-          {/* 1) العنوان */}
           <DialogHeader>
             <DialogTitle>إنشاء مستخدم جديد</DialogTitle>
-           </DialogHeader>
+          </DialogHeader>
 
-          {/* 2) الفورم */}
           <DialogBody>
             <UserForm
               mode="create"
@@ -231,17 +229,16 @@ export default function UsersPage() {
             />
           </DialogBody>
 
-          {/* 3) الأزرار */}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOpenCreate(false)}>
-              إلغاء
-            </Button>
             <Button
               type="submit"
               form="create-user-form"
               disabled={createMut.isPending}
             >
-              {createMut.isPending ? "جارٍ الإنشاء..." : "Create"}
+              {createMut.isPending ? "جارٍ الإنشاء..." : "حفظ"}
+            </Button>
+            <Button variant="outline" onClick={() => setOpenCreate(false)}>
+              إلغاء
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -292,19 +289,19 @@ export default function UsersPage() {
 
           <DialogFooter>
             <Button
-              variant="outline"
-              onClick={() => setOpenEdit(false)}
-              className={cn("rounded-lg px-6 border border-primary")}
-            >
-              إلغاء
-            </Button>
-            <Button
               type="submit"
               form="edit-user-form"
               className={cn("rounded-lg px-6")}
               disabled={updateMut.isPending}
             >
-              {updateMut.isPending ? "جارٍ الحفظ..." : "Save"}
+              {updateMut.isPending ? "جارٍ الحفظ..." : "حفظ"}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setOpenEdit(false)}
+              className={cn("rounded-lg px-6 border border-primary")}
+            >
+              إلغاء
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -32,8 +32,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       Cookies.set(TOKEN_COOKIE, token, { sameSite: "lax", path: "/" });
       Cookies.set(TOKEN_TYPE_COOKIE, tokenType, { sameSite: "lax", path: "/" });
 
-      toast.success("تم تسجيل الدخول");
       window.location.href = "/dashboard";
+      toast.success("تم تسجيل الدخول");
     } catch (e: any) {
       console.log("e", e);
       const msg =

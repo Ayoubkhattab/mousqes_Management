@@ -91,39 +91,30 @@ function CreateForm({
       className="grid gap-4 md:grid-cols-2"
     >
       <div className="space-y-2">
-        <Label htmlFor="username">Username</Label>
-        <Input
-          id="username"
-          placeholder="jdoe"
-          {...form.register("username")}
-        />
+        <Label htmlFor="username">اسم المستخدم</Label>
+        <Input id="username" {...form.register("username")} />
         <p className="text-xs text-red-600">
           {errors.username?.message as any}
         </p>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
-        <Input
-          id="password"
-          type="password"
-          placeholder="••••••••"
-          {...form.register("password")}
-        />
+        <Label htmlFor="password">كلمة المرور</Label>
+        <Input id="password" {...form.register("password")} />
         <p className="text-xs text-red-600">
           {errors.password?.message as any}
         </p>
       </div>
 
       <div className="md:col-span-2 space-y-2">
-        <Label htmlFor="name">Name</Label>
-        <Input id="name" placeholder="Full name" {...form.register("name")} />
+        <Label htmlFor="name">الاسم</Label>
+        <Input id="name" {...form.register("name")} />
         <p className="text-xs text-red-600">{errors.name?.message as any}</p>
       </div>
 
       <div className="flex  w-full p-4 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="role">Role</Label>
+          <Label htmlFor="role">الوظيفة</Label>
           <select
             id="role"
             className={cn(
@@ -144,7 +135,7 @@ function CreateForm({
           </select>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="branch_id">Branch</Label>
+          <Label htmlFor="branch_id">الفرع</Label>
           <select
             id="branch_id"
             className={cn(
@@ -162,7 +153,7 @@ function CreateForm({
                 : "Select branch (optional)"}
             </option>
             {branchesLoading ? (
-              <option disabled>Loading branches...</option>
+              <option disabled>...تحميل الأفرع</option>
             ) : (
               (branches ?? []).map((b) => (
                 <option key={b.id} value={String(b.id)}>
@@ -177,13 +168,13 @@ function CreateForm({
         </div>
       </div>
 
-      {!hideSubmit && (
+      {/* {!hideSubmit && (
         <div className="md:col-span-2 pt-2">
           <Button type="submit" className="min-w-32">
             {submitLabel ?? "Create"}
           </Button>
         </div>
-      )}
+      )} */}
     </form>
   );
 }
@@ -254,7 +245,7 @@ function EditForm({
       className="flex flex-col"
     >
       <div className="space-y-2">
-        <Label htmlFor="username">Username</Label>
+        <Label htmlFor="username">اسم المستخدم</Label>
         <Input
           id="username"
           placeholder="jdoe"
@@ -266,13 +257,13 @@ function EditForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="name">Name</Label>
+        <Label htmlFor="name">الإسم</Label>
         <Input id="name" placeholder="Full name" {...form.register("name")} />
         <p className="text-xs text-red-600">{errors.name?.message as any}</p>
       </div>
 
       <div className="md:col-span-2 space-y-2">
-        <Label htmlFor="password">New Password (optional)</Label>
+        <Label htmlFor="password">كلمة السر </Label>
         <Input
           id="password"
           type="password"
@@ -401,13 +392,13 @@ function EditForm({
         </div>
       </div>
 
-      {!hideSubmit && (
+      {/* {!hideSubmit && (
         <div className="md:col-span-2 pt-2">
           <Button type="submit" className="min-w-32">
-            {submitLabel ?? "Save"}
+            {submitLabel ?? "حفظ"}
           </Button>
         </div>
-      )}
+      )} */}
     </form>
   );
 }
