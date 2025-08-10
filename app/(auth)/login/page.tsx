@@ -31,7 +31,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen grid place-items-center p-4">
+    <div className="min-h-screen grid place-items-center p-4 ">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-center">تسجيل الدخول</CardTitle>

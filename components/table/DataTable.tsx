@@ -55,11 +55,11 @@ export function DataTable<T>({
 
   return (
     <div className="space-y-3">
-      <div className="overflow-x-auto border rounded-2xl">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50">
+      <div className="overflow-x-auto border border-border rounded-md bg-card shadow-card">
+        <table className="w-full text-sm text-card-foreground">
+          <thead className="bg-muted">
             {table.getHeaderGroups().map((hg) => (
-              <tr key={hg.id}>
+              <tr key={hg.id} className="border-b border-border">
                 {hg.headers.map((header) => {
                   const canSort = header.column.getCanSort();
                   const dir = header.column.getIsSorted();
@@ -67,7 +67,7 @@ export function DataTable<T>({
                     <th
                       key={header.id}
                       className={cn(
-                        "p-3 text-right whitespace-nowrap",
+                        "p-3 text-right whitespace-nowrap font-semibold text-foreground",
                         canSort && "cursor-pointer select-none"
                       )}
                       onClick={
@@ -95,7 +95,7 @@ export function DataTable<T>({
               <tr>
                 <td
                   colSpan={table.getAllColumns().length}
-                  className="p-6 text-center"
+                  className="p-6 text-center text-foreground"
                 >
                   جارِ التحميل…
                 </td>
@@ -104,14 +104,17 @@ export function DataTable<T>({
               <tr>
                 <td
                   colSpan={table.getAllColumns().length}
-                  className="p-6 text-center opacity-70"
+                  className="p-6 text-center text-foreground"
                 >
                   {emptyText}
                 </td>
               </tr>
             ) : (
               table.getRowModel().rows.map((row) => (
-                <tr key={row.id} className="border-t">
+                <tr
+                  key={row.id}
+                  className="border-t border-border hover:bg-muted/50"
+                >
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id} className="p-3">
                       {flexRender(
@@ -127,8 +130,9 @@ export function DataTable<T>({
         </table>
       </div>
 
+      {/* شريط التحكّم */}
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="text-sm opacity-75">
+        <div className="text-xs text-foreground">
           {total ? (
             <>
               الصفحة {page} من {pageCount} • إجمالي {total}
@@ -139,25 +143,25 @@ export function DataTable<T>({
         </div>
         <div className="flex items-center gap-2">
           <select
-            className="h-10 rounded-2xl border px-3 text-sm"
+            className="h-8 rounded-md border border-input bg-card text-foreground px-2 text-xs"
             value={pageSize}
             onChange={(e) => onPageSizeChange(Number(e.target.value))}
           >
             {[10, 20, 50, 100].map((s) => (
               <option key={s} value={s}>
-                {s} / صفحة
+                {s}
               </option>
             ))}
           </select>
           <button
-            className="h-10 rounded-2xl border px-3 text-sm disabled:opacity-50"
+            className="h-8 rounded-2xl border border-border px-3 text-sm hover:bg-muted disabled:opacity-50"
             onClick={() => onPageChange(Math.max(1, page - 1))}
             disabled={page <= 1}
           >
             السابق
           </button>
           <button
-            className="h-10 rounded-2xl border px-3 text-sm disabled:opacity-50"
+            className="h-8 rounded-2xl border border-border px-3 text-sm hover:bg-muted disabled:opacity-50"
             onClick={() => onPageChange(page + 1)}
             disabled={pageCount ? page >= pageCount : false}
           >

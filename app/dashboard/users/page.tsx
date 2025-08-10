@@ -16,12 +16,15 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
+  DialogBody,
 } from "@/components/ui/dialog";
 import {
   useUsers,
   useCreateUser,
   useUpdateUser,
 } from "@/features/users/queries";
+import { Pencil } from "lucide-react";
+import { cn } from "@/lib/utils/cn";
 
 const columnsBase: ColumnDef<User>[] = [
   {
@@ -133,14 +136,21 @@ export default function UsersPage() {
       header: "Actions" as const,
       cell: ({ row }) => (
         <Button
-          variant="outline"
+          variant="ghost"
           size="sm"
+          title="تعديل"
+          aria-label="تعديل"
+          className={cn(
+            "h-8 w-8 p-0 rounded-full",
+            "text-foreground/70 hover:text-primary",
+            "hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background"
+          )}
           onClick={() => {
             setSelected(row.original);
             setOpenEdit(true);
           }}
         >
-          Edit
+          <Pencil className="h-4 w-4" />
         </Button>
       ),
       enableSorting: false,
@@ -151,7 +161,7 @@ export default function UsersPage() {
     <div className="space-y-4">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-lg font-semibold">المستخدمون</h2>
+        <h2 className="text-lg font-semibold ">المستخدمون</h2>
         <div className="flex items-center gap-2">
           <Input
             placeholder="بحث بالاسم..."
@@ -190,37 +200,48 @@ export default function UsersPage() {
 
       {/* Create Dialog */}
       <Dialog open={openCreate} onOpenChange={setOpenCreate}>
-        <DialogContent>
+        <DialogContent size="md" align="top">
+          {/* 1) العنوان */}
           <DialogHeader>
-            <DialogTitle>Create User</DialogTitle>
-            <DialogDescription>
-              Fill the fields and press Create.
-            </DialogDescription>
-          </DialogHeader>
+            <DialogTitle>إنشاء مستخدم جديد</DialogTitle>
+           </DialogHeader>
 
-          <UserForm
-            mode="create"
-            submitLabel={createMut.isPending ? "Creating..." : "Create"}
-            onSubmitCreate={async (v) => {
-              try {
-                await createMut.mutateAsync({
-                  username: v.username,
-                  password: v.password!,
-                  name: v.name!,
-                  role: v.role!,
-                  branch_id: v.branch_id,
-                });
-                toast.success("User created");
-                setOpenCreate(false);
-              } catch (e: any) {
-                toast.error(e?.response?.data?.message || "Create failed");
-              }
-            }}
-          />
+          {/* 2) الفورم */}
+          <DialogBody>
+            <UserForm
+              mode="create"
+              formId="create-user-form"
+              hideSubmit
+              submitLabel={createMut.isPending ? "Creating..." : "Create"}
+              onSubmitCreate={async (v) => {
+                try {
+                  await createMut.mutateAsync({
+                    username: v.username,
+                    password: v.password!,
+                    name: v.name!,
+                    role: v.role!,
+                    branch_id: v.branch_id,
+                  });
+                  toast.success("User created");
+                  setOpenCreate(false);
+                } catch (e: any) {
+                  toast.error(e?.response?.data?.message || "Create failed");
+                }
+              }}
+            />
+          </DialogBody>
 
+          {/* 3) الأزرار */}
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setOpenCreate(false)}>
-              Close
+            <Button variant="outline" onClick={() => setOpenCreate(false)}>
+              إلغاء
+            </Button>
+            <Button
+              type="submit"
+              form="create-user-form"
+              disabled={createMut.isPending}
+            >
+              {createMut.isPending ? "جارٍ الإنشاء..." : "Create"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -234,41 +255,56 @@ export default function UsersPage() {
           if (!v) setSelected(null);
         }}
       >
-        <DialogContent>
+        <DialogContent size="md" align="top">
           <DialogHeader>
-            <DialogTitle>Edit User</DialogTitle>
-            <DialogDescription>Update fields and save.</DialogDescription>
+            <DialogTitle>تعديل المستخدم</DialogTitle>
           </DialogHeader>
 
-          <UserForm
-            mode="edit"
-            defaultValues={selected ?? undefined}
-            submitLabel={updateMut.isPending ? "Saving..." : "Save"}
-            onSubmitUpdate={async (v) => {
-              if (!selected) return;
-              try {
-                await updateMut.mutateAsync({
-                  id: selected.id,
-                  dto: {
-                    name: v.name,
-                    password: v.password,
-                    role: v.role,
-                    branch_id: v.branch_id,
-                    is_active: (v as any).is_active,
-                  },
-                });
-                toast.success("User updated");
-                setOpenEdit(false);
-                setSelected(null);
-              } catch (e: any) {
-                toast.error(e?.response?.data?.message || "Update failed");
-              }
-            }}
-          />
+          <DialogBody>
+            <UserForm
+              mode="edit"
+              formId="edit-user-form"
+              hideSubmit
+              defaultValues={selected ?? undefined}
+              submitLabel={updateMut.isPending ? "Saving..." : "Save"}
+              onSubmitUpdate={async (v) => {
+                if (!selected) return;
+                try {
+                  await updateMut.mutateAsync({
+                    id: selected.id,
+                    dto: {
+                      name: v.name,
+                      password: v.password,
+                      role: v.role,
+                      branch_id: v.branch_id,
+                      is_active: (v as any).is_active,
+                    },
+                  });
+                  toast.success("User updated");
+                  setOpenEdit(false);
+                  setSelected(null);
+                } catch (e: any) {
+                  toast.error(e?.response?.data?.message || "Update failed");
+                }
+              }}
+            />
+          </DialogBody>
 
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setOpenEdit(false)}>
-              Close
+            <Button
+              variant="outline"
+              onClick={() => setOpenEdit(false)}
+              className={cn("rounded-lg px-6 border border-primary")}
+            >
+              إلغاء
+            </Button>
+            <Button
+              type="submit"
+              form="edit-user-form"
+              className={cn("rounded-lg px-6")}
+              disabled={updateMut.isPending}
+            >
+              {updateMut.isPending ? "جارٍ الحفظ..." : "Save"}
             </Button>
           </DialogFooter>
         </DialogContent>

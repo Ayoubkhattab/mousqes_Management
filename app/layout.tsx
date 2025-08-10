@@ -7,10 +7,14 @@ export const metadata: Metadata = {
   description: "لوحة تحكم لإدارة شؤون المساجد",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="ar" dir="rtl" suppressHydrationWarning>
-      <body>
+      <body className="bg-card text-foreground">
         <Providers>{children}</Providers>
       </body>
     </html>
