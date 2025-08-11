@@ -1,5 +1,4 @@
 import { api } from "@/lib/api/client";
-import type { District } from "./types";
 
 export type DistrictListParams = {
   page?: number;
@@ -8,6 +7,13 @@ export type DistrictListParams = {
     name?: string; // -> filter[name]
     branchName?: string; // -> filter[branch.name]
   };
+};
+
+type District = { id: number; branch_id: number; name: string };
+type ListResp = {
+  success: boolean;
+  data: District[];
+  meta?: { total?: number };
 };
 
 function mapFilters(filters?: DistrictListParams["filters"]) {
@@ -62,4 +68,11 @@ export async function updateDistrict(
 export async function deleteDistrict(id: number) {
   const res = await api.delete(`/dashboard/districts/${id}`);
   return res.data;
+}
+
+export async function getDistrictsByBranchName(branchName: string) {
+  const { data } = await api.get<ListResp>("/dashboard/districts", {
+    params: { "filter[branch.name]": branchName },
+  });
+  return data.data;
 }

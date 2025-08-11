@@ -7,6 +7,6 @@ export function useBranchesList() {
   return useQuery({
     queryKey: queryKeys.branchesList(),
     queryFn: getBranchesList,
-    staleTime: 5 * 60 * 1000, // 5 دقائق
+    staleTime: 5 * 60 * 1000,
   });
 }

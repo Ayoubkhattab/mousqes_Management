@@ -6,6 +6,7 @@ import {
   updateDistrict,
   deleteDistrict,
   type DistrictListParams,
+  getDistrictsByBranchName,
 } from "./api";
 
 export function useDistricts(params: DistrictListParams) {
@@ -56,5 +57,14 @@ export function useDeleteDistrict() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["districts"] });
     },
+  });
+}
+
+export function useDistrictsByBranch(branchName?: string) {
+  return useQuery({
+    queryKey: ["districts", { branchName: branchName ?? null }],
+    queryFn: () => getDistrictsByBranchName(branchName!),
+    enabled: !!branchName,
+    staleTime: 10 * 60 * 1000,
   });
 }

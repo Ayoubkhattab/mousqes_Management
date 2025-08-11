@@ -1,4 +1,4 @@
-export type ID = string | number;
+export type ID = number;
 
 export interface Branch {
   id: ID;

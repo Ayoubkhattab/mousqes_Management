@@ -104,11 +104,9 @@ export function DialogContent({
           className={cn(
             "pointer-events-auto relative w-full mx-4 sm:mx-0",
             sizeCls[size],
-            // جلد ناعم + حواف أكبر + ظل أنيق مائل للأخضر
-            "rounded-3xl border border-border/80 bg-card text-card-foreground",
+             "rounded-3xl border border-border/80 bg-card text-card-foreground",
             "shadow-[0_30px_70px_-30px_rgba(6,95,70,0.35)]",
-            // شريط علوي رقيق (accent)
-            "before:absolute before:inset-x-0 before:top-0 before:h-1 before:rounded-t-3xl",
+             "before:absolute before:inset-x-0 before:top-0 before:h-1 before:rounded-t-3xl",
             "before:bg-gradient-to-l before:from-primary before:to-emerald-600/80",
             "overflow-hidden max-h-[min(90dvh,900px)] flex flex-col",
             "transition-all duration-200",

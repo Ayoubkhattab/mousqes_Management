@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { Route } from "next";
 import { usePathname } from "next/navigation";
 import {
+  Briefcase,
   Building2,
   LayoutDashboard,
   LogOut,
@@ -28,6 +29,7 @@ const DEFAULT_NAV = [
     label: "المناطق",
     icon: MapPin,
   },
+  { href: "/dashboard/workers", label: "العاملون", icon: Briefcase },
 ] as const satisfies readonly NavItem[];
 
 export default function Sidebar({
