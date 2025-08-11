@@ -1,28 +1,47 @@
 import { api } from "@/lib/api/client";
-import type { ID, ListResponse, Attachment } from "@/features/shared/types";
+import type { ID } from "@/features/shared/types";
 import { endpoints } from "@/lib/api/endpoints";
 
 export const getAttachments = async (params?: Record<string, any>) => {
-  const { data } = await api.get<ListResponse<Attachment>>(endpoints.mosqueAttachments, { params });
+  const { data } = await api.get<ListResponse<Attachment>>(
+    endpoints.mosqueAttachments,
+    { params }
+  );
   return data;
 };
 
-export const getAttachment = async (id: ID) => {
-  const { data } = await api.get<Attachment>(`${endpoints.mosqueAttachments}/${id}`);
-  return data;
+export interface Attachment {
+  id: ID;
+  mosque_id: ID;
+  name: string;
+  type?: string;
+  url?: string;
+  description?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export type ListResponse<T> = {
+  success: boolean;
+  data: T[];
+  links?: {
+    first: string;
+    last: string;
+    prev: string | null;
+    next: string | null;
+  };
+  meta?: {
+    current_page: number;
+    from: number;
+    last_page: number;
+    path: string;
+    per_page: number;
+    to: number;
+    total: number;
+  };
 };
 
-export const createAttachment = async (payload: Partial<Attachment>) => {
-  const { data } = await api.post<Attachment>(endpoints.mosqueAttachments, payload);
-  return data;
-};
-
-export const updateAttachment = async (id: ID, payload: Partial<Attachment>) => {
-  const { data } = await api.put<Attachment>(`${endpoints.mosqueAttachments}/${id}`, payload);
-  return data;
-};
-
-export const deleteAttachment = async (id: ID) => {
-  const { data } = await api.delete<{ success: boolean }>(`${endpoints.mosqueAttachments}/${id}`);
-  return data;
+export type ItemResponse<T> = {
+  success: boolean;
+  data: T;
 };

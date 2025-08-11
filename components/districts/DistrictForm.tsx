@@ -152,7 +152,7 @@ function CreateForm({
 
       {!hideSubmit && (
         <div className="flex justify-end pt-4">
-          <Button type="submit" className="min-w-32" variant="primary">
+          <Button type="submit" className="min-w-32">
             {submitLabel ?? "إنشاء"}
           </Button>
         </div>
@@ -298,7 +298,7 @@ function EditForm({
 
       {!hideSubmit && (
         <div className="flex justify-end pt-4">
-          <Button type="submit" className="min-w-32" variant="primary">
+          <Button type="submit" className="min-w-32">
             {submitLabel ?? "حفظ"}
           </Button>
         </div>
