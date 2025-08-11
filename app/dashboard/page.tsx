@@ -1,4 +1,5 @@
 // app/dashboard/page.tsx
+import { Route } from "next";
 import Link from "next/link";
 
 export default function DashboardHome() {
@@ -15,7 +16,7 @@ export default function DashboardHome() {
           إدارة المستخدمين
         </Link>
         <Link
-          href="/dashboard/mosques"
+          href={"/dashboard/mosques" as Route}
           className="px-4 py-2 rounded-2xl border hover:bg-gray-50"
         >
           إدارة المساجد
