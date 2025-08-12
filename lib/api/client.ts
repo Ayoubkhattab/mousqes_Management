@@ -31,3 +31,29 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// بعد إنشاء instance: export const api = axios.create({...})
+
+api.interceptors.request.use((config) => {
+  console.log("[API ⇢]", (config.method || "get").toUpperCase(), config.url, {
+    params: config.params,
+    data: config.data,
+  });
+  return config;
+});
+
+api.interceptors.response.use(
+  (res) => {
+    console.log("[API ⇠]", res.status, res.config.url, res.data);
+    return res;
+  },
+  (err) => {
+    console.log(
+      "[API ⇠ ERR]",
+      err?.response?.status,
+      err?.config?.url,
+      err?.response?.data
+    );
+    return Promise.reject(err);
+  }
+);

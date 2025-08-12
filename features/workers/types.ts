@@ -1,43 +1,60 @@
+// /features/workers/types.ts
+export type ID = number | string;
+
 export type Worker = {
   id: number;
   name: string;
-
-  branch_id?: number;
-  mosque_id?: number;
+  mosque_id: number;
+  job_title: string;
+  job_status?: string | null;
+  sponsorship_type?: string | null;
+  educational_level?: string | null;
+  quran_level?: string | null;
+  phone?: string | null;
+  salary?: number | null;
+  image?: string | null; // URL
+  created_at?: string | number | null;
+  updated_at?: string | number | null;
   mosque?: {
     id: number;
     name: string;
     branch_id: number;
-    district_id: number;
-  } | null;
-
-  job_title?: string | null;
-  job_status?: string | null;
-  quran_levels?: string | null; //
-  sponsorship_types?: string | null; //
-  educational_level?: string | null;
-
-  phone?: string | null;
-  salary?: number | string | null;
-
-  image?: string | null;
-
-  created_at?: string | number;
-  updated_at?: string | number;
+    district_id?: number | null;
+  };
 };
-export type Mosque = {
-  id: number;
+
+export type ApiList<T> = {
+  success: boolean;
+  data: T[];
+  links: {
+    first: string | null;
+    last: string | null;
+    prev: string | null;
+    next: string | null;
+  };
+  meta: {
+    current_page: number;
+    from: number | null;
+    last_page: number;
+    path: string;
+    per_page: number;
+    to: number | null;
+    total: number;
+  };
+};
+
+export type WorkerCreateDTO = {
+  branch_id: number;
+  mosque_id: number;
   name: string;
-
-  branch_id?: number;
-  district_id?: number;
-
-  category?: string | null;
-  current_status?: string | null;
-  technical_status?: string | null;
-  latitude?: string | null;
-  longitude?: string | null;
-
-  created_at?: string;
-  updated_at?: string;
+  job_title: string;
+  job_status?: string;
+  sponsorship_type?: string;
+  educational_level?: string;
+  quran_level?: string;
+  phone?: string;
+  salary?: number;
+  image?: File;
 };
+
+export type WorkerUpdateDTO = Partial<WorkerCreateDTO>;

@@ -225,3 +225,14 @@ export async function updateMosque(
 export async function deleteMosque(id: number | string) {
   await api.delete(`/dashboard/mosques/${id}`);
 }
+
+type MosqueLite = { id: number; name: string };
+type ListResp<T> = { success: boolean; data: T[] };
+
+// export async function getMosquesByBranchName(branchName: string) {
+//   const { data } = await api.get<ListResp<MosqueLite>>(
+//     "/api/dashboard/mosques",
+//     { params: { "filter[branch.name]": branchName } }
+//   );
+//   return data.data;
+// }

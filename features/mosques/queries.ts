@@ -1,7 +1,11 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getMosqueCurrentStatus, getMosqueEnums } from "./api";
+import {
+  getMosqueCurrentStatus,
+  getMosqueEnums,
+  // getMosquesByBranchName,
+} from "./api";
 import {
   createMosque,
   deleteMosque,
@@ -11,6 +15,8 @@ import {
 } from "./api";
 import type { MosquesQuery } from "./api";
 import { MosqueEnumParams } from "./types";
+import { endpoints } from "@/lib/api/endpoints";
+import { api } from "@/lib/api/client";
 
 export function useMosqueEnums(params?: {
   branch_id?: number | string;
@@ -143,6 +149,26 @@ export function useDeleteMosque() {
     mutationFn: deleteMosque,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["mosques"] });
+    },
+  });
+}
+export function useMosquesByBranchName(branchName?: string) {
+  return useQuery({
+    queryKey: ["mosques", "by-branch", branchName ?? null],
+    enabled: !!branchName,
+    retry: false,
+    staleTime: 10 * 60 * 1000,
+    queryFn: async () => {
+      console.log("[HOOK] fetching mosques for branch:", branchName);
+      const { data } = await api.get(endpoints.mosques, {
+        params: { "filter[branch.name]": branchName, pageSize: 1000 },
+      });
+      const list = (data?.data ?? []).map((m: any) => ({
+        id: m.id,
+        name: m.name,
+      }));
+      console.log("[HOOK] mosques result:", list.length);
+      return list;
     },
   });
 }

@@ -1,163 +1,119 @@
+// /features/workers/api.ts
 import { api } from "@/lib/api/client";
-import type { Mosque, Worker } from "./types";
+import { endpoints } from "@/lib/api/endpoints";
+import type {
+  ID,
+  Worker,
+  WorkerCreateDTO,
+  WorkerUpdateDTO,
+  ApiList,
+} from "./types";
 
-export type WorkerListParams = {
+function toFormData(dto: Partial<WorkerCreateDTO>) {
+  const fd = new FormData();
+  const push = (k: string, v: any) => {
+    if (v === undefined || v === null || v === "") return;
+    fd.append(k, v as any);
+  };
+
+  const branch_id = dto.branch_id != null ? Number(dto.branch_id) : undefined;
+  const mosque_id = dto.mosque_id != null ? Number(dto.mosque_id) : undefined;
+  const salary =
+    dto.salary != null && (dto.salary as any) !== ""
+      ? Number(dto.salary)
+      : undefined;
+
+  push("branch_id", branch_id);
+  push("mosque_id", mosque_id);
+  push("name", dto.name);
+  push("job_title", dto.job_title);
+  push("job_status", dto.job_status);
+  push("sponsorship_type", dto.sponsorship_type);
+  push("educational_level", dto.educational_level);
+  push("quran_level", dto.quran_level);
+  push("phone", dto.phone);
+  push("salary", salary);
+
+  if (dto.image instanceof File) push("image", dto.image);
+
+  return fd;
+}
+
+export async function getWorkers(params?: {
   page?: number;
   pageSize?: number;
-  filters?: {
-    name?: string;
-    mosqueName?: string; // filter[mosque.name]
-  };
-};
-
-function mapFilters(f?: WorkerListParams["filters"]) {
-  if (!f) return {};
-  const p: Record<string, string> = {};
-  if (f.name) p["filter[name]"] = f.name;
-  if (f.mosqueName) p["filter[mosque.name]"] = f.mosqueName;
-  return p;
-}
-
-export async function listWorkers(params: WorkerListParams) {
-  const res = await api.get("/dashboard/workers", {
-    params: {
-      page: params.page ?? 1,
-      pageSize: params.pageSize ?? 20,
-      ...mapFilters(params.filters),
-    },
-  });
-  const payload = res.data;
-  return {
-    data: (payload?.data ?? []) as Worker[],
-    total: payload?.meta?.total ?? payload?.data?.length ?? 0,
-  };
-}
-
-export async function getWorker(id: number) {
-  const res = await api.get(`/dashboard/workers/${id}`);
-  return res.data?.data as Worker;
-}
-
-export async function createWorker(dto: {
-  branch_id: number | string;
-  mosque_id: number | string;
-  name: string;
-  job_title: string;
-  job_status: string;
-  quran_levels?: string;
-  sponsorship_types?: string;
-  educational_level?: string;
-  phone?: string;
-  salary?: number | string;
-  image?: File;
+  filters?: { mosque_name?: string; name?: string };
 }) {
-  const fd = new FormData();
-  fd.append("branch_id", String(dto.branch_id));
-  fd.append("mosque_id", String(dto.mosque_id));
-  fd.append("name", dto.name);
-  fd.append("job_title", dto.job_title);
-  fd.append("job_status", dto.job_status);
-  if (dto.quran_levels) fd.append("quran_levels", dto.quran_levels);
-  if (dto.sponsorship_types)
-    fd.append("sponsorship_types", dto.sponsorship_types);
-  if (dto.educational_level)
-    fd.append("educational_level", dto.educational_level);
-  if (dto.phone) fd.append("phone", dto.phone);
-  if (dto.salary != null) fd.append("salary", String(dto.salary));
-  if (dto.image) fd.append("image", dto.image);
+  const { page, pageSize, filters } = params ?? {};
+  const q: Record<string, any> = {};
+  if (page) q.page = page;
+  if (pageSize) q.pageSize = pageSize;
+  if (filters?.mosque_name) q["filter[mosque.name]"] = filters.mosque_name;
+  if (filters?.name) q["filter[name]"] = filters.name;
 
-  const res = await api.post("/dashboard/workers", fd, {
-    headers: { "Content-Type": "multipart/form-data" },
+  const { data } = await api.get<ApiList<Worker>>(endpoints.workers, {
+    params: q,
   });
-  return res.data?.data as Worker;
+  return data;
 }
 
-/** POST /dashboard/workers/:id (form-data) */
-export async function updateWorker(
-  id: number,
-  dto: {
-    branch_id?: number | string;
-    mosque_id?: number | string;
-    name?: string;
-    job_title?: string;
-    job_status?: string;
-    quran_levels?: string;
-    sponsorship_types?: string;
-    educational_level?: string;
-    phone?: string;
-    salary?: number | string;
-    image?: File;
-  }
-) {
-  const fd = new FormData();
-  if (dto.branch_id != null) fd.append("branch_id", String(dto.branch_id));
-  if (dto.mosque_id != null) fd.append("mosque_id", String(dto.mosque_id));
-  if (dto.name != null) fd.append("name", dto.name);
-  if (dto.job_title != null) fd.append("job_title", dto.job_title);
-  if (dto.job_status != null) fd.append("job_status", dto.job_status);
-  if (dto.quran_levels != null) fd.append("quran_levels", dto.quran_levels);
-  if (dto.sponsorship_types != null)
-    fd.append("sponsorship_types", dto.sponsorship_types);
-  if (dto.educational_level != null)
-    fd.append("educational_level", dto.educational_level);
-  if (dto.phone != null) fd.append("phone", dto.phone);
-  if (dto.salary != null) fd.append("salary", String(dto.salary));
-  if (dto.image) fd.append("image", dto.image);
-
-  const res = await api.post(`/dashboard/workers/${id}`, fd, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
-  return res.data?.data as Worker;
+export async function getWorker(id: ID) {
+  const { data } = await api.get<{ success: boolean; data: Worker }>(
+    endpoints.worker(id)
+  );
+  return data.data;
 }
 
-export async function deleteWorker(id: number) {
-  const res = await api.delete(`/dashboard/workers/${id}`);
-  return res.data;
+export async function createWorker(dto: WorkerCreateDTO) {
+  const { data } = await api.post<{ success: boolean; data: Worker }>(
+    endpoints.workers,
+    toFormData(dto),
+    { headers: { "Content-Type": "multipart/form-data" } }
+  );
+  return data.data;
 }
 
-/* -------- Enums   -------- */
-export async function getJobTitles() {
-  const r = await api.get("/dashboard/workers/enums/job-titles");
-  return (r.data?.data ?? []) as string[];
-}
-export async function getJobStatus() {
-  const r = await api.get("/dashboard/workers/enums/job-status");
-  return (r.data?.data ?? []) as string[];
-}
-export async function getQuranLevels() {
-  const r = await api.get("/dashboard/workers/enums/quran-levels");
-  return (r.data?.data ?? []) as string[];
-}
-export async function getSponsorshipTypes() {
-  const r = await api.get("/workers/enums/sponsorship-types");
-  return (r.data?.data ?? []) as string[];
-}
-export async function getEducationalLevel() {
-  const r = await api.get("/workers/enums/educational-level");
-  return (r.data?.data ?? []) as string[];
+export async function updateWorker(id: ID, dto: WorkerUpdateDTO) {
+  const { data } = await api.post<{ success: boolean; data: Worker }>(
+    endpoints.worker(id),
+    toFormData(dto),
+    { headers: { "Content-Type": "multipart/form-data" } }
+  );
+  return data.data;
 }
 
-export async function listMosques(params: {
-  branch_id?: number | string;
-  branch_name?: string;
-  name?: string;
-  page?: number;
-  pageSize?: number;
-}) {
-  const q: Record<string, any> = {
-    page: params.page ?? 1,
-    pageSize: params.pageSize ?? 200,
-  };
+export async function deleteWorker(id: ID) {
+  await api.delete(endpoints.worker(id));
+}
 
-  if (params.name) q["filter[name]"] = params.name;
-
-  if (params.branch_id != null) q["filter[branch_id]"] = params.branch_id;
-
-  const res = await api.get("/dashboard/mosques", { params: q });
-  const payload = res.data;
-
+export async function getWorkersEnums() {
+  const [jt, js, ql, st, el] = await Promise.all([
+    api.get<{ success: true; data: string[] }>(endpoints.workerEnums.jobTitles),
+    api.get<{ success: true; data: string[] }>(endpoints.workerEnums.jobStatus),
+    api.get<{ success: true; data: string[] }>(
+      endpoints.workerEnums.quranLevels
+    ),
+    api.get<{ success: true; data: string[] }>(
+      endpoints.workerEnums.sponsorshipTypes
+    ),
+    api.get<{ success: true; data: string[] }>(
+      endpoints.workerEnums.educationalLevel
+    ),
+  ]);
   return {
-    data: (payload?.data ?? []) as Mosque[],
-    total: payload?.meta?.total ?? payload?.data?.length ?? 0,
+    jobTitles: jt.data.data,
+    jobStatuses: js.data.data,
+    quranLevels: ql.data.data,
+    sponsorshipTypes: st.data.data,
+    educationalLevels: el.data.data,
   };
+}
+
+// مساعد: جلب مساجد فرع بالاسم
+export async function getMosquesByBranchName(branchName: string, limit = 200) {
+  const { data } = await api.get<ApiList<{ id: number; name: string }>>(
+    endpoints.mosques,
+    { params: { "filter[branch.name]": branchName, pageSize: limit } }
+  );
+  return data.data;
 }

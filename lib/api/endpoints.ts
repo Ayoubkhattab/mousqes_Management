@@ -5,7 +5,7 @@ export const endpoints = {
 
   districts: "/Districts",
 
-  mosques: "/Mosques",
+  mosques: "/dashboard/mosques",
   mosquesEnums: {
     base: "/Mosques/enums",
     currentStatus: "/Mosques/enums/current-status",
@@ -18,14 +18,13 @@ export const endpoints = {
 
   mosqueAttachments: "/mosque-attachments",
 
-  workers: "/Workers",
-  workersEnums: {
-    base: "/Workers/enums",
-    jobTitle: "/Workers/enums/job-title",
-    jobStatus: "/Workers/enums/job-status",
-    quranLevels: "/Workers/enums/quran-levels",
-    sponsorshipTypes: "/Workers/enums/sponsorship-types",
-    educationalLevel: "/Workers/enums/educational-level",
-    rolesEnum: "/Workers/roles-enum",
+  workers: "/dashboard/workers",
+  worker: (id: number | string) => `/dashboard/workers/${id}`,
+  workerEnums: {
+    jobTitles: "/dashboard/workers/enums/job-titles",
+    jobStatus: "/dashboard/workers/enums/job-status",
+    quranLevels: "/dashboard/workers/enums/quran-levels",
+    sponsorshipTypes: "/workers/enums/sponsorship-types", // ← بدون dashboard
+    educationalLevel: "workers/enums/educational-level", // ← بدون dashboard
   },
 };
