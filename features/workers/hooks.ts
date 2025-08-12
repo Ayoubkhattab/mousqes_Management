@@ -3,20 +3,32 @@
 import { useQuery } from "@tanstack/react-query";
 // import { useBranchesList } from "../branches/hooks";
 import { useMemo } from "react";
-import { listMosques } from "./api";
-import { Mosque } from "./types";
+import { Mosque } from "../mosques/types";
+import { listMosques } from "../mosques/api";
+import { useBranchesList } from "../branches/hooks";
 
-export function useMosquesList(branchId?: number) {
+
+export function useMosquesListByBranchId(branchId?: number) {
+  const { data: branches = [] } = useBranchesList();
+  const branchName = useMemo(() => {
+    if (!branchId) return undefined;
+    return branches.find((b) => Number(b.id) === Number(branchId))?.name;
+  }, [branches, branchId]);
+
   return useQuery({
-    queryKey: ["mosques", "list", branchId ?? null],
+    queryKey: ["mosques", "list", branchName ?? null],
     queryFn: async () => {
-      if (!branchId) return { data: [] as Mosque[], total: 0 };
-      return listMosques({ branch_id: branchId, pageSize: 200 });
+      if (!branchName) return { data: [] as Mosque[], total: 0 };
+      return listMosques({
+        pageSize: 200,
+        filters: { branch_name: branchName },
+      });
     },
-    enabled: !!branchId,
+    enabled: !!branchName,
     staleTime: 1000 * 60 * 10,
   });
 }
+
 // export function useBranchesIndex() {
 //   const { data, isLoading } = useBranchesList();
 //   const map = useMemo(
