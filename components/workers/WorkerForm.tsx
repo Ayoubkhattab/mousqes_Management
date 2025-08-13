@@ -117,206 +117,296 @@ function CreateForm({
     <form
       id={formId}
       onSubmit={form.handleSubmit(handleSubmit)}
-      className="space-y-6"
+      className="w-full max-w-4xl mx-auto space-y-6"
     >
       {/* الفرع / المسجد / الاسم */}
-      <div className="grid gap-4 md:grid-cols-3">
-        {/* الفرع */}
-        <div className="space-y-2">
-          <Label htmlFor="branch_id">الفرع</Label>
-          <SelectBase
-            id="branch_id"
-            value={form.watch("branch_id") ?? ""} // controlled
-            onChange={(e) => {
-              const val = e.target.value;
-              if (!val) {
-                // امسح الحقل بطريقة آمنة بدون تمرير undefined لـ setValue
-                form.resetField("branch_id", {
-                  keepTouched: true,
-                  keepDirty: true,
+      <div className="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">
+        <div className="grid gap-6 md:grid-cols-3">
+          {/* الفرع */}
+          <div className="space-y-2">
+            <Label
+              htmlFor="branch_id"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              الفرع
+            </Label>
+            <SelectBase
+              id="branch_id"
+              className="w-full"
+              value={form.watch("branch_id") ?? ""} // controlled
+              onChange={(e) => {
+                const val = e.target.value;
+                if (!val) {
+                  // امسح الحقل بطريقة آمنة بدون تمرير undefined لـ setValue
+                  form.resetField("branch_id", {
+                    keepTouched: true,
+                    keepDirty: true,
+                  });
+                  // صفّر المسجد أيضاً
+                  form.resetField("mosque_id", {
+                    keepTouched: true,
+                    keepDirty: true,
+                  });
+                  return;
+                }
+                const num = Number(val);
+                form.setValue("branch_id", num, {
+                  shouldDirty: true,
+                  shouldValidate: true,
                 });
-                // صفّر المسجد أيضاً
+                // عند تغيير الفرع صفّر المسجد
                 form.resetField("mosque_id", {
                   keepTouched: true,
                   keepDirty: true,
                 });
-                return;
-              }
-              const num = Number(val);
-              form.setValue("branch_id", num, {
-                shouldDirty: true,
-                shouldValidate: true,
-              });
-              // عند تغيير الفرع صفّر المسجد
-              form.resetField("mosque_id", {
-                keepTouched: true,
-                keepDirty: true,
-              });
-            }}
-          >
-            <option value="">اختر الفرع</option>
-            {branchesLoading ? (
-              <option disabled>جاري التحميل...</option>
-            ) : (
-              branches.map((b: any) => (
-                <option key={b.id} value={String(b.id)}>
-                  {b.name}
-                </option>
-              ))
-            )}
-          </SelectBase>
+              }}
+            >
+              <option value="">اختر الفرع</option>
+              {branchesLoading ? (
+                <option disabled>جاري التحميل...</option>
+              ) : (
+                branches.map((b: any) => (
+                  <option key={b.id} value={String(b.id)}>
+                    {b.name}
+                  </option>
+                ))
+              )}
+            </SelectBase>
+            <p className="mt-1 text-xs text-red-600">
+              {errors.branch_id?.message as any}
+            </p>
+          </div>
 
-          <p className="text-xs text-red-600">
-            {errors.branch_id?.message as any}
-          </p>
-        </div>
-
-        {/* المسجد */}
-        <div className="space-y-2">
-          <Label htmlFor="mosque_id">المسجد</Label>
-          <SelectBase
-            key={form.watch("branch_id") ?? "no-branch"} // يجبر إعادة التركيب عند تغيّر الفرع
-            id="mosque_id"
-            disabled={!branchId || mosquesLoading}
-            value={form.watch("mosque_id") ?? ""} // controlled
-            onChange={(e) => {
-              const v = e.target.value;
-              if (!v) {
-                form.resetField("mosque_id", {
-                  keepTouched: true,
-                  keepDirty: true,
+          {/* المسجد */}
+          <div className="space-y-2">
+            <Label
+              htmlFor="mosque_id"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              المسجد
+            </Label>
+            <SelectBase
+              key={form.watch("branch_id") ?? "no-branch"} // يجبر إعادة التركيب عند تغيّر الفرع
+              id="mosque_id"
+              className="w-full disabled:opacity-60"
+              disabled={!branchId || mosquesLoading}
+              value={form.watch("mosque_id") ?? ""} // controlled
+              onChange={(e) => {
+                const v = e.target.value;
+                if (!v) {
+                  form.resetField("mosque_id", {
+                    keepTouched: true,
+                    keepDirty: true,
+                  });
+                  return;
+                }
+                form.setValue("mosque_id", Number(v), {
+                  shouldDirty: true,
+                  shouldValidate: true,
                 });
-                return;
-              }
-              form.setValue("mosque_id", Number(v), {
-                shouldDirty: true,
-                shouldValidate: true,
-              });
-            }}
-          >
-            <option value="">اختر المسجد</option>
-            {mosquesLoading ? (
-              <option disabled>جاري التحميل...</option>
-            ) : (
-              mosques.map((m: any) => (
-                <option key={m.id} value={String(m.id)}>
-                  {m.name}
-                </option>
-              ))
-            )}
-          </SelectBase>
-        </div>
+              }}
+            >
+              <option value="">اختر المسجد</option>
+              {mosquesLoading ? (
+                <option disabled>جاري التحميل...</option>
+              ) : (
+                mosques.map((m: any) => (
+                  <option key={m.id} value={String(m.id)}>
+                    {m.name}
+                  </option>
+                ))
+              )}
+            </SelectBase>
+          </div>
 
-        {/* الاسم */}
-        <div className="space-y-2">
-          <Label htmlFor="name">الاسم</Label>
-          <Input
-            id="name"
-            placeholder="اسم الموظف"
-            {...form.register("name")}
-          />
-          <p className="text-xs text-red-600">{errors.name?.message as any}</p>
+          {/* الاسم */}
+          <div className="space-y-2">
+            <Label
+              htmlFor="name"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              الاسم
+            </Label>
+            <Input
+              id="name"
+              placeholder="اسم الموظف"
+              className="w-full"
+              {...form.register("name")}
+            />
+            <p className="mt-1 text-xs text-red-600">
+              {errors.name?.message as any}
+            </p>
+          </div>
         </div>
       </div>
 
       {/* الوظيفة والحالة */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="job_title">المسمى الوظيفي</Label>
-          <SelectBase id="job_title" {...form.register("job_title")}>
-            <option value="">اختر</option>
-            {(enums?.jobTitles ?? []).map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </SelectBase>
-          <p className="text-xs text-red-600">
-            {errors.job_title?.message as any}
-          </p>
-        </div>
+      <div className="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="space-y-2">
+            <Label
+              htmlFor="job_title"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              المسمى الوظيفي
+            </Label>
+            <SelectBase
+              id="job_title"
+              className="w-full"
+              {...form.register("job_title")}
+            >
+              <option value="">اختر</option>
+              {(enums?.jobTitles ?? []).map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </SelectBase>
+            <p className="mt-1 text-xs text-red-600">
+              {errors.job_title?.message as any}
+            </p>
+          </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="job_status">الوضع الوظيفي</Label>
-          <SelectBase id="job_status" {...form.register("job_status")}>
-            <option value="">غير محدد</option>
-            {(enums?.jobStatuses ?? []).map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </SelectBase>
+          <div className="space-y-2">
+            <Label
+              htmlFor="job_status"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              الوضع الوظيفي
+            </Label>
+            <SelectBase
+              id="job_status"
+              className="w-full"
+              {...form.register("job_status")}
+            >
+              <option value="">غير محدد</option>
+              {(enums?.jobStatuses ?? []).map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </SelectBase>
+          </div>
         </div>
       </div>
 
       {/* كفالة / تعليم / قرآن */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <div className="space-y-2">
-          <Label htmlFor="sponsorship_type">طبيعة الكفالة</Label>
-          <SelectBase
-            id="sponsorship_type"
-            {...form.register("sponsorship_type")}
-          >
-            <option value="">غير محدد</option>
-            {(enums?.sponsorshipTypes ?? []).map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </SelectBase>
-        </div>
+      <div className="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">
+        <div className="grid gap-6 md:grid-cols-3">
+          <div className="space-y-2">
+            <Label
+              htmlFor="sponsorship_type"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              طبيعة الكفالة
+            </Label>
+            <SelectBase
+              id="sponsorship_type"
+              className="w-full"
+              {...form.register("sponsorship_type")}
+            >
+              <option value="">غير محدد</option>
+              {(enums?.sponsorshipTypes ?? []).map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </SelectBase>
+          </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="educational_level">المستوى التعليمي</Label>
-          <SelectBase
-            id="educational_level"
-            {...form.register("educational_level")}
-          >
-            <option value="">غير محدد</option>
-            {(enums?.educationalLevels ?? []).map((e) => (
-              <option key={e} value={e}>
-                {e}
-              </option>
-            ))}
-          </SelectBase>
-        </div>
+          <div className="space-y-2">
+            <Label
+              htmlFor="educational_level"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              المستوى التعليمي
+            </Label>
+            <SelectBase
+              id="educational_level"
+              className="w-full"
+              {...form.register("educational_level")}
+            >
+              <option value="">غير محدد</option>
+              {(enums?.educationalLevels ?? []).map((e) => (
+                <option key={e} value={e}>
+                  {e}
+                </option>
+              ))}
+            </SelectBase>
+          </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="quran_level">درجة الحفظ</Label>
-          <SelectBase id="quran_level" {...form.register("quran_level")}>
-            <option value="">غير محدد</option>
-            {(enums?.quranLevels ?? []).map((q) => (
-              <option key={q} value={q}>
-                {q}
-              </option>
-            ))}
-          </SelectBase>
+          <div className="space-y-2">
+            <Label
+              htmlFor="quran_level"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              درجة الحفظ
+            </Label>
+            <SelectBase
+              id="quran_level"
+              className="w-full"
+              {...form.register("quran_level")}
+            >
+              <option value="">غير محدد</option>
+              {(enums?.quranLevels ?? []).map((q) => (
+                <option key={q} value={q}>
+                  {q}
+                </option>
+              ))}
+            </SelectBase>
+          </div>
         </div>
       </div>
 
       {/* هاتف/راتب/صورة */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <div className="space-y-2">
-          <Label htmlFor="phone">الهاتف</Label>
-          <Input id="phone" placeholder="+90..." {...form.register("phone")} />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="salary">الراتب</Label>
-          <Input
-            id="salary"
-            type="number"
-            step="0.01"
-            {...form.register("salary")}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="image">الصورة (اختياري)</Label>
-          <Input
-            id="image"
-            type="file"
-            accept="image/*"
-            onChange={(e) => setImageFile(e.target.files?.[0])}
-          />
+      <div className="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">
+        <div className="grid gap-6 md:grid-cols-3">
+          <div className="space-y-2">
+            <Label
+              htmlFor="phone"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              الهاتف
+            </Label>
+            <Input
+              id="phone"
+              placeholder="+90..."
+              className="w-full"
+              {...form.register("phone")}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label
+              htmlFor="salary"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              الراتب
+            </Label>
+            <Input
+              id="salary"
+              type="number"
+              step="0.01"
+              className="w-full"
+              {...form.register("salary")}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label
+              htmlFor="image"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              الصورة (اختياري)
+            </Label>
+            <Input
+              id="image"
+              type="file"
+              accept="image/*"
+              className="w-full"
+              onChange={(e) => setImageFile(e.target.files?.[0])}
+            />
+          </div>
         </div>
       </div>
 
@@ -420,140 +510,241 @@ function EditForm({
     <form
       id={formId}
       onSubmit={form.handleSubmit(handleSubmit)}
-      className="space-y-6"
+      className="w-full max-w-4xl mx-auto space-y-6"
     >
-      <div className="grid gap-4 md:grid-cols-3">
-        <div className="space-y-2">
-          <Label htmlFor="branch_id">الفرع</Label>
-          <SelectBase
-            id="branch_id"
-            {...form.register("branch_id", { valueAsNumber: true })}
-          >
-            <option value="">بدون تغيير</option>
-            {branches.map((b: any) => (
-              <option key={b.id} value={String(b.id)}>
-                {b.name}
-              </option>
-            ))}
-          </SelectBase>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="mosque_id">المسجد</Label>
-          <SelectBase
-            id="mosque_id"
-            disabled={!branchId || mosquesLoading}
-            {...form.register("mosque_id", { valueAsNumber: true })}
-          >
-            <option value="">بدون تغيير</option>
-            {mosques.map((m: any) => (
-              <option key={m.id} value={String(m.id)}>
-                {m.name}
-              </option>
-            ))}
-          </SelectBase>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="name">الاسم</Label>
-          <Input
-            id="name"
-            placeholder="اسم الموظف"
-            {...form.register("name")}
-          />
+      {/* الفرع / المسجد / الاسم */}
+      <div className="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">
+        <div className="grid gap-6 md:grid-cols-3">
+          {/* الفرع */}
+          <div className="space-y-2">
+            <Label
+              htmlFor="branch_id"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              الفرع
+            </Label>
+            <SelectBase
+              id="branch_id"
+              className="w-full"
+              {...form.register("branch_id", { valueAsNumber: true })}
+            >
+              <option value="">بدون تغيير</option>
+              {branches.map((b: any) => (
+                <option key={b.id} value={String(b.id)}>
+                  {b.name}
+                </option>
+              ))}
+            </SelectBase>
+          </div>
+
+          {/* المسجد */}
+          <div className="space-y-2">
+            <Label
+              htmlFor="mosque_id"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              المسجد
+            </Label>
+            <SelectBase
+              id="mosque_id"
+              className="w-full disabled:opacity-60"
+              disabled={!branchId || mosquesLoading}
+              {...form.register("mosque_id", { valueAsNumber: true })}
+            >
+              <option value="">بدون تغيير</option>
+              {mosques.map((m: any) => (
+                <option key={m.id} value={String(m.id)}>
+                  {m.name}
+                </option>
+              ))}
+            </SelectBase>
+          </div>
+
+          {/* الاسم */}
+          <div className="space-y-2">
+            <Label
+              htmlFor="name"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              الاسم
+            </Label>
+            <Input
+              id="name"
+              placeholder="اسم الموظف"
+              className="w-full"
+              {...form.register("name")}
+            />
+          </div>
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="job_title">المسمى الوظيفي</Label>
-          <SelectBase id="job_title" {...form.register("job_title")}>
-            <option value="">بدون تغيير</option>
-            {(enums?.jobTitles ?? []).map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </SelectBase>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="job_status">الوضع الوظيفي</Label>
-          <SelectBase id="job_status" {...form.register("job_status")}>
-            <option value="">بدون تغيير</option>
-            {(enums?.jobStatuses ?? []).map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </SelectBase>
+      {/* الوظيفة والحالة */}
+      <div className="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="space-y-2">
+            <Label
+              htmlFor="job_title"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              المسمى الوظيفي
+            </Label>
+            <SelectBase
+              id="job_title"
+              className="w-full"
+              {...form.register("job_title")}
+            >
+              <option value="">بدون تغيير</option>
+              {(enums?.jobTitles ?? []).map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </SelectBase>
+          </div>
+
+          <div className="space-y-2">
+            <Label
+              htmlFor="job_status"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              الوضع الوظيفي
+            </Label>
+            <SelectBase
+              id="job_status"
+              className="w-full"
+              {...form.register("job_status")}
+            >
+              <option value="">بدون تغيير</option>
+              {(enums?.jobStatuses ?? []).map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </SelectBase>
+          </div>
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <div className="space-y-2">
-          <Label htmlFor="sponsorship_type">طبيعة الكفالة</Label>
-          <SelectBase
-            id="sponsorship_type"
-            {...form.register("sponsorship_type")}
-          >
-            <option value="">بدون تغيير</option>
-            {(enums?.sponsorshipTypes ?? []).map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </SelectBase>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="educational_level">المستوى التعليمي</Label>
-          <SelectBase
-            id="educational_level"
-            {...form.register("educational_level")}
-          >
-            <option value="">بدون تغيير</option>
-            {(enums?.educationalLevels ?? []).map((e) => (
-              <option key={e} value={e}>
-                {e}
-              </option>
-            ))}
-          </SelectBase>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="quran_level">درجة الحفظ</Label>
-          <SelectBase id="quran_level" {...form.register("quran_level")}>
-            <option value="">بدون تغيير</option>
-            {(enums?.quranLevels ?? []).map((q) => (
-              <option key={q} value={q}>
-                {q}
-              </option>
-            ))}
-          </SelectBase>
+      {/* كفالة / تعليم / قرآن */}
+      <div className="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">
+        <div className="grid gap-6 md:grid-cols-3">
+          <div className="space-y-2">
+            <Label
+              htmlFor="sponsorship_type"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              طبيعة الكفالة
+            </Label>
+            <SelectBase
+              id="sponsorship_type"
+              className="w-full"
+              {...form.register("sponsorship_type")}
+            >
+              <option value="">بدون تغيير</option>
+              {(enums?.sponsorshipTypes ?? []).map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </SelectBase>
+          </div>
+
+          <div className="space-y-2">
+            <Label
+              htmlFor="educational_level"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              المستوى التعليمي
+            </Label>
+            <SelectBase
+              id="educational_level"
+              className="w-full"
+              {...form.register("educational_level")}
+            >
+              <option value="">بدون تغيير</option>
+              {(enums?.educationalLevels ?? []).map((e) => (
+                <option key={e} value={e}>
+                  {e}
+                </option>
+              ))}
+            </SelectBase>
+          </div>
+
+          <div className="space-y-2">
+            <Label
+              htmlFor="quran_level"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              درجة الحفظ
+            </Label>
+            <SelectBase
+              id="quran_level"
+              className="w-full"
+              {...form.register("quran_level")}
+            >
+              <option value="">بدون تغيير</option>
+              {(enums?.quranLevels ?? []).map((q) => (
+                <option key={q} value={q}>
+                  {q}
+                </option>
+              ))}
+            </SelectBase>
+          </div>
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <div className="space-y-2">
-          <Label htmlFor="phone">الهاتف</Label>
-          <Input id="phone" placeholder="+90..." {...form.register("phone")} />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="salary">الراتب</Label>
-          <Input
-            id="salary"
-            type="number"
-            step="0.01"
-            {...form.register("salary")}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="image">الصورة (اختياري)</Label>
-          <Input
-            id="image"
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              setImageFile(f);
-            }}
-          />
+      {/* هاتف/راتب/صورة */}
+      <div className="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">
+        <div className="grid gap-6 md:grid-cols-3">
+          <div className="space-y-2">
+            <Label
+              htmlFor="phone"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              الهاتف
+            </Label>
+            <Input
+              id="phone"
+              placeholder="+90..."
+              className="w-full"
+              {...form.register("phone")}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label
+              htmlFor="salary"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              الراتب
+            </Label>
+            <Input
+              id="salary"
+              type="number"
+              step="0.01"
+              className="w-full"
+              {...form.register("salary")}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label
+              htmlFor="image"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              الصورة (اختياري)
+            </Label>
+            <Input
+              id="image"
+              type="file"
+              accept="image/*"
+              className="w-full"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                setImageFile(f);
+              }}
+            />
+          </div>
         </div>
       </div>
     </form>

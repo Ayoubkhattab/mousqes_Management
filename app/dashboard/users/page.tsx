@@ -107,7 +107,7 @@ export default function UsersPage() {
   const [q, setQ] = useState("");
   const qDebounced = useDebounce(q);
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(0);
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const [openCreate, setOpenCreate] = useState(false);

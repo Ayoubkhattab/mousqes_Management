@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/table/DataTable";
 import { useDebounce } from "@/lib/hooks/useDebounce";
 import { toast } from "sonner";
-import { Delete, Pencil } from "lucide-react";
+import { Delete, Pencil, Trash } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
 import type { District } from "@/features/districts/types";
@@ -68,7 +68,7 @@ export default function DistrictsPage() {
   const [branchName, setBranchName] = useState<string>("");
 
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(10);
 
   const [openCreate, setOpenCreate] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
@@ -139,7 +139,7 @@ export default function DistrictsPage() {
                 }
               }}
             >
-              <Delete className="h-4 w-4" />
+              <Trash className="h-4 w-4" />
             </Button>
           </div>
         ),

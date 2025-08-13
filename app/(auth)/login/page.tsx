@@ -31,20 +31,21 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen grid place-items-center p-4 ">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen grid place-items-center  ">
+      <Card className="w-full max-w-md p-0 rounded-md shadow-md min-h-[65%]">
         <CardHeader>
-          <CardTitle className="text-center">تسجيل الدخول</CardTitle>
+          <CardTitle className="text-center bg-primary rounded-t-md py-4 text-white">
+            تسجيل الدخول
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="space-y-4 p-4 mt-10"
+          >
             <div className="space-y-2">
               <Label htmlFor="username">اسم المستخدم</Label>
-              <Input
-                id="username"
-                {...register("username")}
-                placeholder="admin"
-              />
+              <Input id="username" {...register("username")} placeholder="" />
               {errors.username && (
                 <p className="text-sm text-red-600">
                   {errors.username.message}
@@ -65,9 +66,11 @@ export default function LoginPage() {
                 </p>
               )}
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "جارٍ الدخول..." : "دخول"}
-            </Button>
+            <div className="py-4  flex justify-center ">
+              <Button type="submit" className="w-[50%]" disabled={loading}>
+                {loading ? "جارٍ الدخول..." : "دخول"}
+              </Button>
+            </div>
           </form>
         </CardContent>
       </Card>

@@ -119,7 +119,7 @@ export default function MosquesPage() {
   const { data: districts } = useDistrictsByBranch(branchName);
   // جدول
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(0);
   const [sorting, setSorting] = useState<SortingState>([]);
   const sortParam = useMemo(() => mapSortingToBackend(sorting), [sorting]);
 
@@ -390,15 +390,15 @@ export default function MosquesPage() {
             />
           </DialogBody>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOpenEdit(false)}>
-              إلغاء
-            </Button>
             <Button
               type="submit"
               form="edit-mosque-form"
               disabled={updateMut.isPending}
             >
               {updateMut.isPending ? "جارٍ الحفظ..." : "حفظ"}
+            </Button>
+            <Button variant="outline" onClick={() => setOpenEdit(false)}>
+              إلغاء
             </Button>
           </DialogFooter>
         </DialogContent>

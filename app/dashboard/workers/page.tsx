@@ -96,7 +96,7 @@ export default function WorkersPage() {
 
   // Table
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(0);
   const [sorting, setSorting] = useState<SortingState>([]);
   const sortParam = useMemo(() => mapSortingToBackend(sorting), [sorting]);
 

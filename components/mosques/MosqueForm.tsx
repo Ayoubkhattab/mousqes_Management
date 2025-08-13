@@ -859,14 +859,6 @@ function EditForm({
           />
         </div>
       </div>
-
-      {/* {!hideSubmit && (
-        <div className="pt-2">
-          <Button type="submit" className="min-w-32">
-            {submitLabel ?? "Save"}
-          </Button>
-        </div>
-      )} */}
     </form>
   );
 }
