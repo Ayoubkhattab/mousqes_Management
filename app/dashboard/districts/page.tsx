@@ -29,6 +29,8 @@ import {
   DialogBody,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { useAuth } from "@/contexts/AuthContext";
+import Can from "@/components/auth/Can";
 
 const columnsBase: ColumnDef<District>[] = [
   {
@@ -73,7 +75,7 @@ export default function DistrictsPage() {
   const [openCreate, setOpenCreate] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [selected, setSelected] = useState<District | null>(null);
-
+  const { roleName } = useAuth();
   const { data, isLoading, isError } = useDistricts({
     page,
     pageSize,
@@ -168,27 +170,29 @@ export default function DistrictsPage() {
               className="w-full sm:w-48"
             />
 
-            <select
-              className={cn(
-                "h-10 rounded-md border border-gray-300 dark:border-gray-600",
-                "bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100",
-                "px-3 py-2 text-sm focus:outline-none focus:ring-2",
-                "focus:ring-blue-500 focus:border-blue-500",
-                "transition-colors duration-200"
-              )}
-              value={branchName}
-              onChange={(e) => {
-                setBranchName(e.target.value);
-                setPage(1);
-              }}
-            >
-              <option value="">كل الفروع</option>
-              {(branches ?? []).map((b) => (
-                <option key={b.id} value={b.name}>
-                  {b.name}
-                </option>
-              ))}
-            </select>
+            <Can only={["system_administrator", "supervisor"]}>
+              <select
+                className={cn(
+                  "h-10 rounded-md border border-gray-300 dark:border-gray-600",
+                  "bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100",
+                  "px-3 py-2 text-sm focus:outline-none focus:ring-2",
+                  "focus:ring-blue-500 focus:border-blue-500",
+                  "transition-colors duration-200"
+                )}
+                value={branchName}
+                onChange={(e) => {
+                  setBranchName(e.target.value);
+                  setPage(1);
+                }}
+              >
+                <option value="">كل الفروع</option>
+                {(branches ?? []).map((b) => (
+                  <option key={b.id} value={b.name}>
+                    {b.name}
+                  </option>
+                ))}
+              </select>
+            </Can>
           </div>
 
           <Button
