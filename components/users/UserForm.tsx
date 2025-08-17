@@ -138,6 +138,10 @@ function CreateForm({
           <Label htmlFor="branch_id">الفرع</Label>
           <select
             id="branch_id"
+            {...form.register("branch_id", {
+              required: needBranch ? "حقل الفرع مطلوب." : false,
+              valueAsNumber: true, // يحوّل القيمة لرقم
+            })}
             className={cn(
               "  h-10 rounded-lg border border-gray-300 dark:border-gray-600",
               "bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100",
