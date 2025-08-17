@@ -1,5 +1,6 @@
-// /app/dashboard/workers/page.tsx (أو المسار عندك)
+// /app/dashboard/workers/page.tsx
 "use client";
+
 import { useMemo, useState } from "react";
 import { ColumnDef, SortingState } from "@tanstack/react-table";
 import { Input } from "@/components/ui/input";
@@ -25,6 +26,8 @@ import {
   DialogBody,
 } from "@/components/ui/dialog";
 
+const currency = (v?: number | string | null) =>
+  v === null || v === undefined || v === "" ? "-" : Number(v).toLocaleString();
 const colsBase: ColumnDef<Worker>[] = [
   {
     accessorKey: "id",
@@ -40,10 +43,10 @@ const colsBase: ColumnDef<Worker>[] = [
     enableSorting: false,
   },
   {
-    accessorKey: "quran_level",
+    id: "quran_levels",
     header: "درجة الحفظ" as const,
     enableSorting: false,
-    cell: ({ row }) => row.original.quran_level ?? "-",
+    cell: ({ row }) => (row.original as any).quran_levels ?? "-",
   },
   {
     accessorKey: "educational_level",
@@ -52,16 +55,34 @@ const colsBase: ColumnDef<Worker>[] = [
     cell: ({ row }) => row.original.educational_level ?? "-",
   },
   {
-    accessorKey: "sponsorship_type",
+    id: "sponsorship_types",
     header: "طبيعة الكفالة" as const,
     enableSorting: false,
-    cell: ({ row }) => row.original.sponsorship_type ?? "-",
+    cell: ({ row }) => (row.original as any).sponsorship_types ?? "-",
   },
   { accessorKey: "job_title", header: "المسمى" as const, enableSorting: false },
   {
     accessorKey: "job_status",
     header: "الحالة" as const,
     enableSorting: false,
+  },
+  {
+    accessorKey: "salary",
+    header: "الراتب (USD)" as const,
+    enableSorting: false,
+    cell: ({ row }) => currency(row.original.salary as any),
+  },
+  {
+    accessorKey: "salary_sy",
+    header: "الراتب (ل.س)" as const,
+    enableSorting: false,
+    cell: ({ row }) => currency(row.original.salary_sy as any),
+  },
+  {
+    accessorKey: "sham_cash",
+    header: "شام كاش" as const,
+    enableSorting: false,
+    cell: ({ row }) => currency(row.original.sham_cash as any),
   },
   { accessorKey: "phone", header: "الهاتف" as const, enableSorting: false },
   {
@@ -96,7 +117,7 @@ export default function WorkersPage() {
 
   // Table
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(0);
+  const [pageSize, setPageSize] = useState(10); // ✅ قيمة ابتدائية منطقية
   const [sorting, setSorting] = useState<SortingState>([]);
   const sortParam = useMemo(() => mapSortingToBackend(sorting), [sorting]);
 
@@ -105,12 +126,12 @@ export default function WorkersPage() {
     pageSize,
     filters: {
       name: nameDeb || undefined,
-      mosque_name: mosqueNameDeb || undefined,
+      mosque_name: mosqueNameDeb || undefined, // تأكد أن queries.ts يترجمها إلى filter[mosque.name]
     },
   });
 
   const rows = (data?.data ?? []) as Worker[];
-  const total = data?.meta?.total ?? rows.length;
+  const total = (data as any)?.meta?.total ?? rows.length;
 
   // Mutations + Dialogs
   const createMut = useCreateWorker();
@@ -123,7 +144,7 @@ export default function WorkersPage() {
     ...colsBase,
     {
       id: "actions",
-      header: "Actions" as const,
+      header: "إجراءات" as const,
       cell: ({ row }) => (
         <Button
           variant="ghost"
