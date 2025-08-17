@@ -25,6 +25,7 @@ import {
 } from "@/features/users/queries";
 import { Pencil } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { useAuth } from "@/contexts/AuthContext";
 
 const columnsBase: ColumnDef<User>[] = [
   {
@@ -116,11 +117,15 @@ export default function UsersPage() {
 
   const sortParam = useMemo(() => mapSortingToBackend(sorting), [sorting]);
 
+  const { roleName } = useAuth();
+  const allowed = roleName === "system_administrator";
+  if (!allowed) return <div className="p-6 text-red-600"> 404 Not Found</div>;
+
   const { data, isLoading, isError } = useUsers({
     page,
     pageSize,
     sort: sortParam,
-    filters: qDebounced ? { name: qDebounced } : undefined, // سيحوّلها mapper إلى filter[name]
+    filters: qDebounced ? { name: qDebounced } : undefined, //  filter[name]
   });
 
   const rows = (data?.data ?? []) as User[];

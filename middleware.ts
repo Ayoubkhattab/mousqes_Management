@@ -30,6 +30,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  // 🔒 طبّق الميدلوير على كل شيء *عدا* ملفات Next الثابتة
   matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };

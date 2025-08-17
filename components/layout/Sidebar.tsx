@@ -1,5 +1,5 @@
+// components/Sidebar.tsx
 "use client";
-
 import Link from "next/link";
 import type { Route } from "next";
 import { usePathname } from "next/navigation";
@@ -13,33 +13,54 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { useAuth } from "@/contexts/AuthContext";
+import type { RoleName } from "@/lib/auth/type.auth";
 
 type NavItem = {
   href: Route;
   label: string;
   icon: LucideIcon;
+  children?: NavItem[];
+  allowedRoles?: RoleName[];
 };
 
 const DEFAULT_NAV = [
   { href: "/dashboard", label: "الصفحة الرئيسية", icon: LayoutDashboard },
-  { href: "/dashboard/users", label: "المستخدمون", icon: Users },
-  { href: "/dashboard/mosques", label: "المساجد", icon: Building2 },
+  {
+    href: "/dashboard/users",
+    label: "المستخدمون",
+    icon: Users,
+    allowedRoles: ["system_administrator"],
+  },
+  {
+    href: "/dashboard/mosques",
+    label: "المساجد",
+    icon: Building2,
+  },
   {
     href: "/dashboard/districts",
     label: "المناطق",
     icon: MapPin,
   },
-  { href: "/dashboard/workers", label: "العاملون", icon: Briefcase },
+  {
+    href: "/dashboard/workers",
+    label: "العاملين",
+    icon: Briefcase,
+  },
 ] as const satisfies readonly NavItem[];
+
+function canSee(item: NavItem, roleName: RoleName | null) {
+  if (!item.allowedRoles?.length) return true;
+  return roleName ? item.allowedRoles.includes(roleName) : false;
+}
 
 export default function Sidebar({
   nav = DEFAULT_NAV,
-  logout = () => {},
 }: {
   nav?: readonly NavItem[];
-  logout?: () => void;
 }) {
   const pathname = usePathname();
+  const { logout, roleName } = useAuth();
 
   return (
     <div className="flex flex-col h-full gap-6">
@@ -47,6 +68,8 @@ export default function Sidebar({
 
       <nav className="flex-1 space-y-1">
         {nav.map((item) => {
+          if (!canSee(item, roleName)) return null;
+
           const Icon = item.icon;
           const active =
             pathname === item.href ||
