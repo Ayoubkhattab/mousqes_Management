@@ -7,11 +7,13 @@ export type Worker = {
   mosque_id: number;
   job_title: string;
   job_status?: string | null;
-  sponsorship_type?: string | null;
+  sponsorship_types?: string | null;
   educational_level?: string | null;
-  quran_level?: string | null;
+  quran_levels?: string;
   phone?: string | null;
   salary?: number | null;
+  salary_sy?: number | null;
+  sham_cash?: number | null;
   image?: string | null; // URL
   created_at?: string | number | null;
   updated_at?: string | number | null;
@@ -49,11 +51,13 @@ export type WorkerCreateDTO = {
   name: string;
   job_title: string;
   job_status?: string;
-  sponsorship_type?: string;
+  sponsorship_types?: string;
   educational_level?: string;
-  quran_level?: string;
+  quran_levels: string;
   phone?: string;
   salary?: number;
+  salary_sy?: number;
+  sham_cash?: number;
   image?: File;
 };
 

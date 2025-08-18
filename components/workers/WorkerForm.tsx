@@ -1,7 +1,7 @@
 // /components/workers/WorkerForm.tsx
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -66,44 +66,46 @@ function CreateForm({
       name: defaultValues?.name ?? "",
       job_title: defaultValues?.job_title ?? "",
       job_status: defaultValues?.job_status ?? "",
-      sponsorship_type: defaultValues?.sponsorship_type ?? "",
+      sponsorship_types: defaultValues?.sponsorship_types ?? "",
       educational_level: defaultValues?.educational_level ?? "",
-      quran_level: defaultValues?.quran_level ?? "",
+      quran_levels: defaultValues?.quran_levels ?? "",
       phone: defaultValues?.phone ?? "",
       salary: (defaultValues?.salary as any) ?? undefined,
     },
   });
 
-  const errors = form.formState.errors;
+  const { errors } = form.formState;
 
-  // نقرأ الفرع المختار كرقم
   const branchId = form.watch("branch_id") as number | undefined;
 
-  // نحسب اسم الفرع وفق الـ branchId
   const branchName = useMemo(() => {
     if (!branchId) return undefined;
     const b = branches.find((x: any) => Number(x.id) === Number(branchId));
     return b?.name?.trim();
   }, [branches, branchId]);
 
-  // نجلب المساجد الخاصة بالفرع المختار
   const { data: mosques = [], isLoading: mosquesLoading } =
     useMosquesByBranchName(branchName);
 
   useEffect(() => {
-    // عند تغيير الفرع امسح المسجد المختار
     form.resetField("mosque_id", { keepDirty: true, keepTouched: false });
-  }, [branchId]); // راقب branchId مباشرة
+  }, [branchId]);
 
   const handleSubmit = async (v: CreateWorkerValues) => {
+    console.log("v", v);
     try {
       await onSubmitCreate?.({
         ...v,
         branch_id: Number(v.branch_id),
         mosque_id: Number(v.mosque_id),
-        salary: v.salary === undefined ? undefined : Number(v.salary),
+        salary:
+          v.salary === undefined || v.salary === null
+            ? undefined
+            : Number(v.salary),
+        quran_levels: v.quran_levels,
+        sponsorship_types: (v as any).sponsorship_types || undefined,
         image: imageFile,
-      });
+      } as any);
     } catch (e: any) {
       const msg =
         e?.response?.data?.details?.name?.[0] ||
@@ -124,10 +126,7 @@ function CreateForm({
         <div className="grid gap-6 md:grid-cols-3">
           {/* الفرع */}
           <div className="space-y-2">
-            <Label
-              htmlFor="branch_id"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
+            <Label htmlFor="branch_id" className="block text-sm font-medium">
               الفرع
             </Label>
             <SelectBase
@@ -137,24 +136,20 @@ function CreateForm({
               onChange={(e) => {
                 const val = e.target.value;
                 if (!val) {
-                  // امسح الحقل بطريقة آمنة بدون تمرير undefined لـ setValue
                   form.resetField("branch_id", {
                     keepTouched: true,
                     keepDirty: true,
                   });
-                  // صفّر المسجد أيضاً
                   form.resetField("mosque_id", {
                     keepTouched: true,
                     keepDirty: true,
                   });
                   return;
                 }
-                const num = Number(val);
-                form.setValue("branch_id", num, {
+                form.setValue("branch_id", Number(val), {
                   shouldDirty: true,
                   shouldValidate: true,
                 });
-                // عند تغيير الفرع صفّر المسجد
                 form.resetField("mosque_id", {
                   keepTouched: true,
                   keepDirty: true,
@@ -179,14 +174,11 @@ function CreateForm({
 
           {/* المسجد */}
           <div className="space-y-2">
-            <Label
-              htmlFor="mosque_id"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
+            <Label htmlFor="mosque_id" className="block text-sm font-medium">
               المسجد
             </Label>
             <SelectBase
-              key={form.watch("branch_id") ?? "no-branch"} // يجبر إعادة التركيب عند تغيّر الفرع
+              key={form.watch("branch_id") ?? "no-branch"}
               id="mosque_id"
               className="w-full disabled:opacity-60"
               disabled={!branchId || mosquesLoading}
@@ -217,14 +209,14 @@ function CreateForm({
                 ))
               )}
             </SelectBase>
+            <p className="mt-1 text-xs text-red-600">
+              {errors.mosque_id?.message as any}
+            </p>
           </div>
 
           {/* الاسم */}
           <div className="space-y-2">
-            <Label
-              htmlFor="name"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
+            <Label htmlFor="name" className="block text-sm font-medium">
               الاسم
             </Label>
             <Input
@@ -243,118 +235,171 @@ function CreateForm({
       {/* الوظيفة والحالة */}
       <div className="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">
         <div className="grid gap-6 md:grid-cols-2">
-          <div className="space-y-2">
-            <Label
-              htmlFor="job_title"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
-              المسمى الوظيفي
-            </Label>
-            <SelectBase
-              id="job_title"
-              className="w-full"
-              {...form.register("job_title")}
-            >
-              <option value="">اختر</option>
-              {(enums?.jobTitles ?? []).map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </SelectBase>
-            <p className="mt-1 text-xs text-red-600">
-              {errors.job_title?.message as any}
-            </p>
-          </div>
+          {/* المسمّى الوظيفي */}
+          <Controller
+            name="job_title"
+            control={form.control}
+            rules={{ required: "Required" }}
+            render={({ field }) => (
+              <div className="space-y-2">
+                <Label
+                  htmlFor="job_title"
+                  className="block text-sm font-medium"
+                >
+                  المسمى الوظيفي
+                </Label>
+                <SelectBase
+                  id="job_title"
+                  className="w-full"
+                  value={field.value ?? ""}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  onBlur={field.onBlur}
+                >
+                  <option value="">اختر</option>
+                  {(enums?.jobTitles ?? []).map((t) => (
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
+                  ))}
+                </SelectBase>
+                <p className="mt-1 text-xs text-red-600">
+                  {errors.job_title?.message as any}
+                </p>
+              </div>
+            )}
+          />
 
-          <div className="space-y-2">
-            <Label
-              htmlFor="job_status"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
-              الوضع الوظيفي
-            </Label>
-            <SelectBase
-              id="job_status"
-              className="w-full"
-              {...form.register("job_status")}
-            >
-              <option value="">غير محدد</option>
-              {(enums?.jobStatuses ?? []).map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </SelectBase>
-          </div>
+          {/* الوضع الوظيفي */}
+          <Controller
+            name="job_status"
+            control={form.control}
+            render={({ field }) => (
+              <div className="space-y-2">
+                <Label
+                  htmlFor="job_status"
+                  className="block text-sm font-medium"
+                >
+                  الوضع الوظيفي
+                </Label>
+                <SelectBase
+                  id="job_status"
+                  className="w-full"
+                  value={field.value ?? ""}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  onBlur={field.onBlur}
+                >
+                  <option value="">غير محدد</option>
+                  {(enums?.jobStatuses ?? []).map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </SelectBase>
+                <p className="mt-1 text-xs text-red-600">
+                  {errors.job_status?.message as any}
+                </p>
+              </div>
+            )}
+          />
         </div>
       </div>
 
       {/* كفالة / تعليم / قرآن */}
       <div className="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">
         <div className="grid gap-6 md:grid-cols-3">
-          <div className="space-y-2">
-            <Label
-              htmlFor="sponsorship_type"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
-              طبيعة الكفالة
-            </Label>
-            <SelectBase
-              id="sponsorship_type"
-              className="w-full"
-              {...form.register("sponsorship_type")}
-            >
-              <option value="">غير محدد</option>
-              {(enums?.sponsorshipTypes ?? []).map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </SelectBase>
-          </div>
+          {/* طبيعة الكفالة */}
+          <Controller
+            name="sponsorship_types"
+            control={form.control}
+            render={({ field }) => (
+              <div className="space-y-2">
+                <Label
+                  htmlFor="sponsorship_types"
+                  className="block text-sm font-medium"
+                >
+                  طبيعة الكفالة
+                </Label>
+                <SelectBase
+                  id="sponsorship_types"
+                  className="w-full"
+                  value={field.value ?? ""}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  onBlur={field.onBlur}
+                >
+                  <option value="">غير محدد</option>
+                  {(enums?.sponsorshipTypes ?? []).map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </SelectBase>
+              </div>
+            )}
+          />
 
-          <div className="space-y-2">
-            <Label
-              htmlFor="educational_level"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
-              المستوى التعليمي
-            </Label>
-            <SelectBase
-              id="educational_level"
-              className="w-full"
-              {...form.register("educational_level")}
-            >
-              <option value="">غير محدد</option>
-              {(enums?.educationalLevels ?? []).map((e) => (
-                <option key={e} value={e}>
-                  {e}
-                </option>
-              ))}
-            </SelectBase>
-          </div>
+          {/* المستوى التعليمي */}
+          <Controller
+            name="educational_level"
+            control={form.control}
+            render={({ field }) => (
+              <div className="space-y-2">
+                <Label
+                  htmlFor="educational_level"
+                  className="block text-sm font-medium"
+                >
+                  المستوى التعليمي
+                </Label>
+                <SelectBase
+                  id="educational_level"
+                  className="w-full"
+                  value={field.value ?? ""}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  onBlur={field.onBlur}
+                >
+                  <option value="">غير محدد</option>
+                  {(enums?.educationalLevels ?? []).map((e) => (
+                    <option key={e} value={e}>
+                      {e}
+                    </option>
+                  ))}
+                </SelectBase>
+              </div>
+            )}
+          />
 
-          <div className="space-y-2">
-            <Label
-              htmlFor="quran_level"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
-              درجة الحفظ
-            </Label>
-            <SelectBase
-              id="quran_level"
-              className="w-full"
-              {...form.register("quran_level")}
-            >
-              <option value="">غير محدد</option>
-              {(enums?.quranLevels ?? []).map((q) => (
-                <option key={q} value={q}>
-                  {q}
-                </option>
-              ))}
-            </SelectBase>
-          </div>
+          {/* درجة الحفظ */}
+          <Controller
+            name="quran_levels"
+            control={form.control}
+            rules={{ required: "حقل درجة الحفظ مطلوب." }}
+            render={({ field }) => (
+              <div className="space-y-2">
+                <Label
+                  htmlFor="quran_levels"
+                  className="block text-sm font-medium"
+                >
+                  درجة الحفظ
+                </Label>
+                <SelectBase
+                  id="quran_levels"
+                  className="w-full"
+                  value={field.value ?? ""}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  onBlur={field.onBlur}
+                >
+                  <option value="">غير محدد</option>
+                  {(enums?.quranLevels ?? []).map((q) => (
+                    <option key={q} value={q}>
+                      {q}
+                    </option>
+                  ))}
+                </SelectBase>
+                <p className="mt-1 text-xs text-red-600">
+                  {errors.quran_levels?.message as any}
+                </p>
+              </div>
+            )}
+          />
         </div>
       </div>
 
@@ -362,10 +407,7 @@ function CreateForm({
       <div className="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">
         <div className="grid gap-6 md:grid-cols-3">
           <div className="space-y-2">
-            <Label
-              htmlFor="phone"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
+            <Label htmlFor="phone" className="block text-sm font-medium">
               الهاتف
             </Label>
             <Input
@@ -377,10 +419,7 @@ function CreateForm({
           </div>
 
           <div className="space-y-2">
-            <Label
-              htmlFor="salary"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
+            <Label htmlFor="salary" className="block text-sm font-medium">
               الراتب
             </Label>
             <Input
@@ -388,15 +427,15 @@ function CreateForm({
               type="number"
               step="0.01"
               className="w-full"
-              {...form.register("salary")}
+              {...form.register("salary", { valueAsNumber: true })}
             />
+            <p className="mt-1 text-xs text-red-600">
+              {errors.salary?.message as any}
+            </p>
           </div>
 
           <div className="space-y-2">
-            <Label
-              htmlFor="image"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
+            <Label htmlFor="image" className="block text-sm font-medium">
               الصورة (اختياري)
             </Label>
             <Input
@@ -447,9 +486,9 @@ function EditForm({
       name: defaultValues?.name ?? "",
       job_title: defaultValues?.job_title ?? "",
       job_status: defaultValues?.job_status ?? "",
-      sponsorship_type: defaultValues?.sponsorship_type ?? "",
+      sponsorship_types: defaultValues?.sponsorship_types ?? "",
       educational_level: defaultValues?.educational_level ?? "",
-      quran_level: defaultValues?.quran_level ?? "",
+      quran_levels: defaultValues?.quran_levels ?? "",
       phone: defaultValues?.phone ?? "",
       salary: (defaultValues?.salary as any) ?? undefined,
     },
@@ -463,9 +502,9 @@ function EditForm({
       name: defaultValues?.name ?? "",
       job_title: defaultValues?.job_title ?? "",
       job_status: defaultValues?.job_status ?? "",
-      sponsorship_type: defaultValues?.sponsorship_type ?? "",
+      sponsorship_types: defaultValues?.sponsorship_types ?? "",
       educational_level: defaultValues?.educational_level ?? "",
-      quran_level: defaultValues?.quran_level ?? "",
+      quran_levels: defaultValues?.quran_levels ?? "",
       phone: defaultValues?.phone ?? "",
       salary: (defaultValues?.salary as any) ?? undefined,
     });
@@ -630,15 +669,15 @@ function EditForm({
         <div className="grid gap-6 md:grid-cols-3">
           <div className="space-y-2">
             <Label
-              htmlFor="sponsorship_type"
+              htmlFor="sponsorship_types"
               className="block text-sm font-medium text-gray-700 dark:text-gray-300"
             >
               طبيعة الكفالة
             </Label>
             <SelectBase
-              id="sponsorship_type"
+              id="sponsorship_types"
               className="w-full"
-              {...form.register("sponsorship_type")}
+              {...form.register("sponsorship_types")}
             >
               <option value="">بدون تغيير</option>
               {(enums?.sponsorshipTypes ?? []).map((s) => (
@@ -672,15 +711,15 @@ function EditForm({
 
           <div className="space-y-2">
             <Label
-              htmlFor="quran_level"
+              htmlFor="quran_levels"
               className="block text-sm font-medium text-gray-700 dark:text-gray-300"
             >
               درجة الحفظ
             </Label>
             <SelectBase
-              id="quran_level"
+              id="quran_levels"
               className="w-full"
-              {...form.register("quran_level")}
+              {...form.register("quran_levels")}
             >
               <option value="">بدون تغيير</option>
               {(enums?.quranLevels ?? []).map((q) => (

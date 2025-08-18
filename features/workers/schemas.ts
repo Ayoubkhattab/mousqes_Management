@@ -7,9 +7,9 @@ export const createWorkerSchema = z.object({
   name: z.string().min(2, "الاسم قصير"),
   job_title: z.string().min(1, "المسمى مطلوب"),
   job_status: z.string().optional(),
-  sponsorship_type: z.string().optional(),
+  sponsorship_types: z.string().optional(),
   educational_level: z.string().optional(),
-  quran_level: z.string().optional(),
+  quran_levels: z.string().min(1, "حقل درجة الحفظ مطلوب."),
   phone: z.string().optional(),
   salary: z.preprocess(
     (v) => (v === "" || v === undefined ? undefined : Number(v)),

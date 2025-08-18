@@ -28,9 +28,9 @@ function toFormData(dto: Partial<WorkerCreateDTO>) {
   push("name", dto.name);
   push("job_title", dto.job_title);
   push("job_status", dto.job_status);
-  push("sponsorship_type", dto.sponsorship_type);
+  push("sponsorship_types", dto.sponsorship_types);
   push("educational_level", dto.educational_level);
-  push("quran_level", dto.quran_level);
+  push("quran_levels", dto.quran_levels);
   push("phone", dto.phone);
   push("salary", salary);
 
